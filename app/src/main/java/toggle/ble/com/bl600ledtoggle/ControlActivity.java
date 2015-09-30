@@ -216,6 +216,7 @@ public class ControlActivity extends AppCompatActivity {
                 setLedState("0");                                                           //Update the state of the die with a new roll and send over BLE
             }
             toggleLed.setEnabled(false); //will be re-enabled when state has been set successfully
+            readLed.setEnabled(false);
         }
     };
 
@@ -225,6 +226,7 @@ public class ControlActivity extends AppCompatActivity {
 
         public void onClick(View view) {                                                //Button was clicked
             readLed.setEnabled(false); //will be re-enabled when state has been set successfully
+            toggleLed.setEnabled(false);
             readCharacteristic(mLedCharacteristic);               //Call method to write the characteristic
         }
     };
@@ -311,7 +313,14 @@ public class ControlActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) { //A request to Read has completed
             if (status == BluetoothGatt.GATT_SUCCESS) {                                 //See if the read was successful
-                final String dataValue = characteristic.getStringValue(0);                     //Get the value of the characteristic
+                final String dataValue;
+                if(characteristic.getStringValue(0).length()>1) {
+                    dataValue = characteristic.getStringValue(1);                     //Get the value of the characteristic
+                }
+                else {
+                    dataValue = characteristic.getStringValue(0);                                     //Has not been set yet
+                }
+
                 Log.d(TAG,"Led state read: "+ dataValue);
                 if(characteristic.getUuid().toString().equals(LED_TOGGLE)) {
                     mHandler.postDelayed(new Runnable() { //Re-enable toggle button
@@ -319,6 +328,7 @@ public class ControlActivity extends AppCompatActivity {
                         public void run() {
                             //Do something after 100ms
                             readLed.setEnabled(true);
+                            toggleLed.setEnabled(true);
                             updateReadLedState(dataValue);
                         }
                     }, 100);
@@ -340,6 +350,7 @@ public class ControlActivity extends AppCompatActivity {
                     public void run() {
                         //Do something after 100ms
                         toggleLed.setEnabled(true);
+                        readLed.setEnabled(true);
                     }
                 }, 100);
             }
