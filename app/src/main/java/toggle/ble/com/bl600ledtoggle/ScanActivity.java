@@ -153,16 +153,18 @@ public class ScanActivity extends ListActivity {
             mHandler.postDelayed(new Runnable() {                                       //Create delayed runnable that will stop the scan when it runs after SCAN_PERIOD milliseconds
                 @Override
                 public void run() {
+                    Toast.makeText(getApplicationContext(),"Scan Stopped",Toast.LENGTH_LONG).show();
                     mScanning = false;                                                  //Indicate that we are not scanning - used for menu Stop/Scan context
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);                      //Stop scanning - callback method indicates which scan to stop
                     invalidateOptionsMenu();                                            //Indicate that the options menu has changed, so should be recreated.
                 }
             }, SCAN_PERIOD);
-
+            Toast.makeText(this,"Scanning for Devices",Toast.LENGTH_LONG).show();
             mScanning = true;                                                           //Indicate that we are busy scanning - used for menu Stop/Scan context
             mBluetoothAdapter.startLeScan(mLeScanCallback);                             //Start scanning with callback method to execute when a new BLE device is found
         } else {                                                                          //Method was called with option to stop scanning
             mScanning = false;                                                          //Indicate that we are not scanning - used for menu Stop/Scan context
+            Toast.makeText(this,"Scan Stopped",Toast.LENGTH_LONG).show();
             mBluetoothAdapter.stopLeScan(mLeScanCallback);                              //Stop scanning - callback method indicates which scan to stop
         }
         invalidateOptionsMenu();                                                        //Indicate that the options menu has changed, so should be recreated.
