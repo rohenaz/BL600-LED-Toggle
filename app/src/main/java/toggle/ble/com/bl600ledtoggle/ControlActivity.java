@@ -46,8 +46,8 @@ public class ControlActivity extends AppCompatActivity {
     private BluetoothGattCharacteristic mLedCharacteristic;                             //The BLE characteristic used for LED_TOGGLE data transfers
     private Handler mHandler;                                                           //Handler used to send die roll after a time delay
 
-    private TextView mConnectionState, txtLedState;                                      //TextViews to show connection state and die roll number on the display
-    private Button toggleLed;                                                        //Button to initiate a roll of the die
+    private TextView mConnectionState, txtLedState, txtLedStateRead;                                      //TextViews to show connection state and die roll number on the display
+    private Button toggleLed, readLed;                                                        //Button to initiate a roll of the die
 
     private String mDeviceName, mDeviceAddress;                                         //Strings for the Bluetooth device name and MAC address
     private boolean mConnected = false;                                                 //Indicator of an active Bluetooth connection
@@ -71,8 +71,11 @@ public class ControlActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.txtDeviceAddress)).setText(mDeviceAddress);          //Display device address on the screen
         mConnectionState = (TextView) findViewById(R.id.txtConnectionState);               //TextView that will display the connection state
         txtLedState = (TextView) findViewById(R.id.txtLedState);
+        txtLedStateRead = (TextView) findViewById(R.id.txtLedStateRead);
         toggleLed = (Button) findViewById(R.id.btnToggleLed);                        //Button that will roll the die when clicked
         toggleLed.setOnClickListener(toggleLedClickListener);                     //Set onClickListener for when button is pressed
+        readLed = (Button) findViewById(R.id.btnReadLed);
+        readLed.setOnClickListener(readLedClickListener);
 
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE); //Get the BluetoothManager
         mBluetoothAdapter = bluetoothManager.getAdapter();                              //Get a reference to the BluetoothAdapter (radio)
@@ -182,6 +185,7 @@ public class ControlActivity extends AppCompatActivity {
             }
         });
     }
+
     private void updateLedState(final String state) {
         runOnUiThread(new Runnable() {
             @Override
@@ -190,8 +194,18 @@ public class ControlActivity extends AppCompatActivity {
             }
         });
     }
+    private void updateReadLedState(final String state) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                txtLedStateRead.setText(state);                       //Set the LED state text to show new value
+            }
+        });
+    }
+
+
     // ----------------------------------------------------------------------------------------------------------------
-    // Listener for the roll red die button
+    // Listener for the toggle LED button
     private final Button.OnClickListener toggleLedClickListener = new Button.OnClickListener() {
 
         public void onClick(View view) {                                                //Button was clicked
@@ -202,6 +216,16 @@ public class ControlActivity extends AppCompatActivity {
                 setLedState("0");                                                           //Update the state of the die with a new roll and send over BLE
             }
             toggleLed.setEnabled(false); //will be re-enabled when state has been set successfully
+        }
+    };
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Listener for the read LED button
+    private final Button.OnClickListener readLedClickListener = new Button.OnClickListener() {
+
+        public void onClick(View view) {                                                //Button was clicked
+            readLed.setEnabled(false); //will be re-enabled when state has been set successfully
+            readCharacteristic(mLedCharacteristic);               //Call method to write the characteristic
         }
     };
 
@@ -287,10 +311,21 @@ public class ControlActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) { //A request to Read has completed
             if (status == BluetoothGatt.GATT_SUCCESS) {                                 //See if the read was successful
-                String dataValue = characteristic.getStringValue(1);                     //Get the value of the characteristic
+                final String dataValue = characteristic.getStringValue(0);                     //Get the value of the characteristic
+                Log.d(TAG,"Led state read: "+ dataValue);
                 if(characteristic.getUuid().toString().equals(LED_TOGGLE)) {
-                    updateLedState(dataValue);
+                    mHandler.postDelayed(new Runnable() { //Re-enable toggle button
+                        @Override
+                        public void run() {
+                            //Do something after 100ms
+                            readLed.setEnabled(true);
+                            updateReadLedState(dataValue);
+                        }
+                    }, 100);
                 }
+            }
+            else {
+                Log.d(TAG,"Read Failed");
             }
         }
 

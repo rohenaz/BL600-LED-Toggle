@@ -45,7 +45,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LED State: "
+                android:text="LED State (From Notify): "
                 android:id="@+id/textView" />
 
             <TextView
@@ -55,11 +55,42 @@
                 android:id="@+id/txtLedState" />
         </LinearLayout>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TOGGLE LED"
-            android:id="@+id/btnToggleLed" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LED State (From Read): "
+                android:id="@+id/textView2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:id="@+id/txtLedStateRead" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TOGGLE LED\n(WRITE)"
+                android:id="@+id/btnToggleLed" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="READ\nLED STATE"
+                android:id="@+id/btnReadLed" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>
